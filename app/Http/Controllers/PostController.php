@@ -3,27 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\PostRequest;
+use App\Http\Resources\PostResource;
 use App\Models\Post;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use RepositoryPattern\Repo;
 
 class PostController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function __construct(Repo $repo)
     {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        $this->repo = $repo;
     }
 
     /**
@@ -31,60 +22,23 @@ class PostController extends Controller
      */
     public function store(PostRequest $request)
     {
-        try {
-
-            DB::beginTransaction();
-            $data = $request->except('photos');
-            $data['user_id'] = auth()->id();
-            $post = Post::create($data);
-            if ($request->hasFile('photos')) {
-                foreach ($request->file('photos') as $uploadPhoto) {
-                    $photo = new PostPhoto();
-                    $photo->post_id = $post->id;
-                    $photo->photo = 'app/' . $uploadPhoto->store('posts');
-                    $photo->save();
-                }
-            }
-            DB::commit();
-            return response()->json([
-                "data" => $post,
-            ]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            return $e->getMessage();
-        }
-
+      return $this->repo->store($request);
     }
 
     /**
-     * Display the specified resource.
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function show(Post $post)
+    public function all()
     {
-        //
+        return $this->all();
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * @param $id
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function edit(Post $post)
+    public function getOne($id)
     {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Post $post)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Post $post)
-    {
-        //
+        return $this->getOne($id);
     }
 }
